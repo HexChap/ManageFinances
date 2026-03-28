@@ -14,7 +14,7 @@ export async function login(email: string, password: string): Promise<void> {
 }
 
 export async function logout(): Promise<void> {
-  await api.post('/logout', {})
+  await api.post('/account/logout')
 }
 
 export async function getMe(): Promise<AuthUser> {
