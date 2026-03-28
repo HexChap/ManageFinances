@@ -215,8 +215,11 @@ export const Finances = () => {
   }
 
   const handleLogout = async () => {
-    await logout()
-    navigate("/login")
+    try {
+      await logout()
+    } finally {
+      navigate("/login")
+    }
   }
 
   const toggleExpTag = (id: number) =>

@@ -35,8 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = async () => {
-    await authLogout()
-    setUser(null)
+    try {
+      await authLogout()
+    } finally {
+      setUser(null)
+    }
   }
 
   const register = async (email: string, password: string) => {
