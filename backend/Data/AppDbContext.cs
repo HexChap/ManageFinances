@@ -5,8 +5,28 @@ namespace backend.Data;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+        ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+    }
 
-    public DbSet<Product> Products => Set<Product>();
-    public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<Income> Incomes => Set<Income>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Category>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<Expense>()
+            .Property(e => e.Value)
+            .HasColumnType("numeric(10,2)");
+
+        modelBuilder.Entity<Income>()
+            .Property(i => i.Value)
+            .HasColumnType("numeric(10,2)");
+    }
 }
