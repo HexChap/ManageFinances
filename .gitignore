@@ -1,0 +1,19 @@
+# .NET build artifacts
+backend/bin/
+backend/obj/
+
+# User-specific files
+*.user
+*.suo
+.vs/
+
+# Environment
+.env
+.env.local
+
+# Node
+frontend/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
