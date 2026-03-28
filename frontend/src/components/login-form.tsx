@@ -14,11 +14,13 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useNavigate } from "react-router-dom"
 
 export const LoginForm = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
+  const navigate = useNavigate()
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -53,12 +55,12 @@ export const LoginForm = ({
                 <Input id="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Вход</Button>
-                <Button variant="outline" type="button">
-                  Вход с Google
+                <Button type="submit" onClick={() => navigate("/finances")}>
+                  Вход
                 </Button>
                 <FieldDescription className="text-center">
-                  Нямате акаунт? <a href="#">Регистрирайте се</a>
+                  Нямате акаунт?{" "}
+                  <a onClick={() => navigate("/signup")}>Регистрирайте се</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>

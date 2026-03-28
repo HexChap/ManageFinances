@@ -14,11 +14,13 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useNavigate } from "react-router-dom"
 
 export const SignupForm = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
+  const navigate = useNavigate()
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -56,9 +58,12 @@ export const SignupForm = ({
                 <FieldDescription>Трябва да е поне 8 символа.</FieldDescription>
               </Field>
               <Field>
-                <Button type="submit">Създай акаунт</Button>
+                <Button type="submit" onClick={() => navigate("/finances")}>
+                  Създай акаунт
+                </Button>
                 <FieldDescription className="text-center">
-                  Вече имате акаунт? <a href="#">Влезте</a>
+                  Вече имате акаунт?{" "}
+                  <a onClick={() => navigate("/login")}>Влезте</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>

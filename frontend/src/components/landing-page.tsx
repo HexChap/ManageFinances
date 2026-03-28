@@ -1,8 +1,10 @@
 import { ArrowRightIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { useNavigate } from "react-router-dom"
 
-const AboutUs = () => {
+export const AboutUs = () => {
+  const navigate = useNavigate()
   return (
     <section className="bg-muted py-8 sm:py-16 lg:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -11,17 +13,17 @@ const AboutUs = () => {
             За нас
           </h2>
           <p className="text-xl text-muted-foreground">
-            Нашата история на успех е мощно свидетелство за екипна работа и
-            постоянство. Заедно сме се изправяли пред предизвикателства,
-            отбелязвали победи и изграждали разказ за растеж и успех.
+            Умно приложение за лични финанси, което ти помага да контролираш
+            разходите си, да следиш приходите и да планираш бюджета си — всичко
+            на едно място.
           </p>
           <Button
             size="lg"
             asChild
             className="group rounded-lg text-base has-[>svg]:px-6"
           >
-            <a href="#">
-              Научи повече
+            <a onClick={() => navigate("/signup")}>
+              Регистрирай се
               <ArrowRightIcon className="transition-transform duration-200 group-hover:translate-x-0.5" />
             </a>
           </Button>
@@ -36,5 +38,3 @@ const AboutUs = () => {
     </section>
   )
 }
-
-export default AboutUs
