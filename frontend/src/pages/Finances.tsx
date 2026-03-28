@@ -2,8 +2,8 @@ import { useState } from "react"
 import {
   PlusIcon,
   Trash2Icon,
-  TagIcon,
   FolderIcon,
+  TagIcon,
   TrendingUpIcon,
   TrendingDownIcon,
   XIcon,
@@ -37,50 +37,45 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-type Tag = { id: number; name: string; userId: number }
-type Category = { id: number; name: string; userId: number }
-type Expense = {
-  id: number
-  value: number
-  userId: number
-  categoryId: number
-  tagIds: number[]
-}
-type Income = { id: number; value: number; userId: number }
+import { useExpenses } from "@/hooks/useExpenses"
+import { useIncomes } from "@/hooks/useIncomes"
+import { useCategories } from "@/hooks/useCategories"
+import { useTags } from "@/hooks/useTags"
 
 const MOCK_USER_ID = 1
 
-const initialCategories: Category[] = [
-  { id: 1, name: "Храна и напитки", userId: 1 },
-  { id: 2, name: "Транспорт", userId: 1 },
-  { id: 3, name: "Комунални услуги", userId: 1 },
-]
-const initialTags: Tag[] = [
-  { id: 1, name: "основно", userId: 1 },
-  { id: 2, name: "повтарящо се", userId: 1 },
-  { id: 3, name: "еднократно", userId: 1 },
-]
-const initialExpenses: Expense[] = [
-  { id: 1, value: 42.5, userId: 1, categoryId: 1, tagIds: [1, 2] },
-  { id: 2, value: 15.0, userId: 1, categoryId: 2, tagIds: [1] },
-]
-const initialIncomes: Income[] = [
-  { id: 1, value: 3200.0, userId: 1 },
-  { id: 2, value: 500.0, userId: 1 },
-]
-
 export const Finances = () => {
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
-  const [tags, setTags] = useState<Tag[]>(initialTags)
-  const [expenses, setExpenses] = useState<Expense[]>(initialExpenses)
-  const [incomes, setIncomes] = useState<Income[]>(initialIncomes)
+  const {
+    expenses,
+    loading: expLoading,
+    error: expError,
+    add: addExpense,
+    remove: removeExpense,
+  } = useExpenses(MOCK_USER_ID)
 
-  const [nextId, setNextId] = useState(100)
-  const genId = () => {
-    setNextId((n) => n + 1)
-    return nextId
-  }
+  const {
+    incomes,
+    loading: incLoading,
+    error: incError,
+    add: addIncome,
+    remove: removeIncome,
+  } = useIncomes(MOCK_USER_ID)
+
+  const {
+    categories,
+    loading: catLoading,
+    error: catError,
+    add: addCategory,
+    remove: removeCategory,
+  } = useCategories(MOCK_USER_ID)
+
+  const {
+    tags,
+    loading: tagLoading,
+    error: tagError,
+    add: addTag,
+    remove: removeTag,
+  } = useTags(MOCK_USER_ID)
 
   const [catName, setCatName] = useState("")
   const [catOpen, setCatOpen] = useState(false)
@@ -96,85 +91,61 @@ export const Finances = () => {
   const [incValue, setIncValue] = useState("")
   const [incOpen, setIncOpen] = useState(false)
 
-  const addCategory = () => {
+  const handleAddCategory = async () => {
     if (!catName.trim()) return
-    setCategories((c) => [
-      ...c,
-      { id: genId(), name: catName.trim(), userId: MOCK_USER_ID },
-    ])
+    await addCategory({ name: catName.trim(), userId: MOCK_USER_ID })
     setCatName("")
     setCatOpen(false)
   }
 
-  const addTag = () => {
+  const handleAddTag = async () => {
     if (!tagName.trim()) return
-    setTags((t) => [
-      ...t,
-      { id: genId(), name: tagName.trim(), userId: MOCK_USER_ID },
-    ])
+    await addTag({ name: tagName.trim(), userId: MOCK_USER_ID })
     setTagName("")
     setTagOpen(false)
   }
 
-  const addExpense = () => {
+  const handleAddExpense = async () => {
     const val = parseFloat(expValue)
     if (isNaN(val) || !expCatId) return
-    setExpenses((e) => [
-      ...e,
-      {
-        id: genId(),
-        value: val,
-        userId: MOCK_USER_ID,
-        categoryId: parseInt(expCatId),
-        tagIds: expTagIds,
-      },
-    ])
+    await addExpense({
+      value: val,
+      categoryId: parseInt(expCatId),
+      userId: MOCK_USER_ID,
+      tagIds: expTagIds,
+    })
     setExpValue("")
     setExpCatId("")
     setExpTagIds([])
     setExpOpen(false)
   }
 
-  const addIncome = () => {
+  const handleAddIncome = async () => {
     const val = parseFloat(incValue)
     if (isNaN(val)) return
-    setIncomes((i) => [...i, { id: genId(), value: val, userId: MOCK_USER_ID }])
+    await addIncome({ value: val, userId: MOCK_USER_ID })
     setIncValue("")
     setIncOpen(false)
   }
-
-  const deleteCategory = (id: number) => {
-    setCategories((c) => c.filter((x) => x.id !== id))
-    setExpenses((e) => e.filter((x) => x.categoryId !== id))
-  }
-  const deleteTag = (id: number) => {
-    setTags((t) => t.filter((x) => x.id !== id))
-    setExpenses((e) =>
-      e.map((x) => ({ ...x, tagIds: x.tagIds.filter((tid) => tid !== id) }))
-    )
-  }
-  const deleteExpense = (id: number) =>
-    setExpenses((e) => e.filter((x) => x.id !== id))
-  const deleteIncome = (id: number) =>
-    setIncomes((i) => i.filter((x) => x.id !== id))
-
-  const getCategoryName = (id: number) =>
-    categories.find((c) => c.id === id)?.name ?? "—"
-  const getTagName = (id: number) => tags.find((t) => t.id === id)?.name ?? ""
-
-  const totalExpenses = expenses.reduce((s, e) => s + e.value, 0)
-  const totalIncomes = incomes.reduce((s, i) => s + i.value, 0)
-  const balance = totalIncomes - totalExpenses
 
   const toggleExpTag = (id: number) =>
     setExpTagIds((ids) =>
       ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]
     )
 
+  const getCategoryName = (id: number) =>
+    categories.find((c) => c.id === id)?.name ?? "—"
+
+  const getTagName = (id: number) =>
+    tags.find((t) => t.id === id)?.name ?? ""
+
+  const totalExpenses = expenses.reduce((s, e) => s + e.value, 0)
+  const totalIncomes = incomes.reduce((s, i) => s + i.value, 0)
+  const balance = totalIncomes - totalExpenses
+
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-5xl space-y-6">
-        {/* Заглавие */}
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
             Финансов мениджър
@@ -184,13 +155,11 @@ export const Finances = () => {
           </p>
         </div>
 
-        {/* Обобщение */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <TrendingUpIcon className="size-4 text-emerald-500" /> Общи
-                приходи
+                <TrendingUpIcon className="size-4 text-emerald-500" /> Общи приходи
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -202,8 +171,7 @@ export const Finances = () => {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <TrendingDownIcon className="size-4 text-rose-500" /> Общи
-                разходи
+                <TrendingDownIcon className="size-4 text-rose-500" /> Общи разходи
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -219,16 +187,13 @@ export const Finances = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p
-                className={`text-2xl font-semibold ${balance >= 0 ? "text-emerald-600" : "text-rose-600"}`}
-              >
+              <p className={`text-2xl font-semibold ${balance >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
                 {balance >= 0 ? "+" : ""}${balance.toFixed(2)}
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Основни табове */}
         <Tabs defaultValue="expenses">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="expenses">Разходи</TabsTrigger>
@@ -278,31 +243,34 @@ export const Finances = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-1.5">
-                        <Label>Тагове</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {tags.map((t) => (
-                            <Badge
-                              key={t.id}
-                              variant={
-                                expTagIds.includes(t.id) ? "default" : "outline"
-                              }
-                              className="cursor-pointer select-none"
-                              onClick={() => toggleExpTag(t.id)}
-                            >
-                              {t.name}
-                            </Badge>
-                          ))}
+                      {tags.length > 0 && (
+                        <div className="space-y-1.5">
+                          <Label>Тагове</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {tags.map((t) => (
+                              <Badge
+                                key={t.id}
+                                variant={expTagIds.includes(t.id) ? "default" : "outline"}
+                                className="cursor-pointer select-none"
+                                onClick={() => toggleExpTag(t.id)}
+                              >
+                                {t.name}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                     <DialogFooter>
-                      <Button onClick={addExpense}>Запази</Button>
+                      <Button onClick={handleAddExpense}>Запази</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </CardHeader>
               <CardContent className="p-0">
+                {expError && (
+                  <p className="px-4 py-3 text-sm text-destructive">{expError}</p>
+                )}
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -310,52 +278,52 @@ export const Finances = () => {
                       <TableHead>Сума</TableHead>
                       <TableHead>Категория</TableHead>
                       <TableHead>Тагове</TableHead>
+                      <TableHead>Дата</TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {expenses.length === 0 && (
+                    {expLoading && (
                       <TableRow>
-                        <TableCell
-                          colSpan={5}
-                          className="py-8 text-center text-muted-foreground"
-                        >
+                        <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                          Зареждане…
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {!expLoading && expenses.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                           Няма разходи
                         </TableCell>
                       </TableRow>
                     )}
                     {expenses.map((exp) => (
                       <TableRow key={exp.id}>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {exp.id}
-                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{exp.id}</TableCell>
                         <TableCell className="font-medium text-rose-600">
                           -${exp.value.toFixed(2)}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">
-                            {getCategoryName(exp.categoryId)}
-                          </Badge>
+                          <Badge variant="secondary">{getCategoryName(exp.categoryId)}</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {exp.tagIds.map((tid) => (
-                              <Badge
-                                key={tid}
-                                variant="outline"
-                                className="text-xs"
-                              >
+                              <Badge key={tid} variant="outline" className="text-xs">
                                 {getTagName(tid)}
                               </Badge>
                             ))}
                           </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(exp.createdAt).toLocaleDateString("bg-BG")}
                         </TableCell>
                         <TableCell>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="size-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => deleteExpense(exp.id)}
+                            onClick={() => removeExpense(exp.id)}
                           >
                             <Trash2Icon className="size-3.5" />
                           </Button>
@@ -396,45 +364,54 @@ export const Finances = () => {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button onClick={addIncome}>Запази</Button>
+                      <Button onClick={handleAddIncome}>Запази</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </CardHeader>
               <CardContent className="p-0">
+                {incError && (
+                  <p className="px-4 py-3 text-sm text-destructive">{incError}</p>
+                )}
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12">ID</TableHead>
                       <TableHead>Сума</TableHead>
+                      <TableHead>Дата</TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {incomes.length === 0 && (
+                    {incLoading && (
                       <TableRow>
-                        <TableCell
-                          colSpan={3}
-                          className="py-8 text-center text-muted-foreground"
-                        >
+                        <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
+                          Зареждане…
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {!incLoading && incomes.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
                           Няма приходи
                         </TableCell>
                       </TableRow>
                     )}
                     {incomes.map((inc) => (
                       <TableRow key={inc.id}>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {inc.id}
-                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{inc.id}</TableCell>
                         <TableCell className="font-medium text-emerald-600">
                           +${inc.value.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(inc.createdAt).toLocaleDateString("bg-BG")}
                         </TableCell>
                         <TableCell>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="size-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => deleteIncome(inc.id)}
+                            onClick={() => removeIncome(inc.id)}
                           >
                             <Trash2Icon className="size-3.5" />
                           </Button>
@@ -470,27 +447,29 @@ export const Finances = () => {
                           placeholder="напр. Хранителни стоки"
                           value={catName}
                           onChange={(e) => setCatName(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && addCategory()}
+                          onKeyDown={(e) => e.key === "Enter" && handleAddCategory()}
                         />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button onClick={addCategory}>Запази</Button>
+                      <Button onClick={handleAddCategory}>Запази</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </CardHeader>
               <CardContent>
+                {catError && (
+                  <p className="py-2 text-sm text-destructive">{catError}</p>
+                )}
                 <div className="space-y-2">
-                  {categories.length === 0 && (
-                    <p className="py-8 text-center text-muted-foreground">
-                      Няма категории
-                    </p>
+                  {catLoading && (
+                    <p className="py-8 text-center text-muted-foreground">Зареждане…</p>
+                  )}
+                  {!catLoading && categories.length === 0 && (
+                    <p className="py-8 text-center text-muted-foreground">Няма категории</p>
                   )}
                   {categories.map((cat) => {
-                    const count = expenses.filter(
-                      (e) => e.categoryId === cat.id
-                    ).length
+                    const count = expenses.filter((e) => e.categoryId === cat.id).length
                     return (
                       <div
                         key={cat.id}
@@ -498,9 +477,7 @@ export const Finances = () => {
                       >
                         <div className="flex items-center gap-3">
                           <FolderIcon className="size-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">
-                            {cat.name}
-                          </span>
+                          <span className="text-sm font-medium">{cat.name}</span>
                           <Badge variant="secondary" className="text-xs">
                             {count} {count === 1 ? "разход" : "разхода"}
                           </Badge>
@@ -509,7 +486,7 @@ export const Finances = () => {
                           variant="ghost"
                           size="icon"
                           className="size-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => deleteCategory(cat.id)}
+                          onClick={() => removeCategory(cat.id)}
                         >
                           <Trash2Icon className="size-3.5" />
                         </Button>
@@ -544,27 +521,29 @@ export const Finances = () => {
                           placeholder="напр. основно"
                           value={tagName}
                           onChange={(e) => setTagName(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && addTag()}
+                          onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
                         />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button onClick={addTag}>Запази</Button>
+                      <Button onClick={handleAddTag}>Запази</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </CardHeader>
               <CardContent>
+                {tagError && (
+                  <p className="py-2 text-sm text-destructive">{tagError}</p>
+                )}
                 <div className="flex flex-wrap gap-2">
-                  {tags.length === 0 && (
-                    <p className="w-full py-8 text-center text-muted-foreground">
-                      Няма тагове
-                    </p>
+                  {tagLoading && (
+                    <p className="w-full py-8 text-center text-muted-foreground">Зареждане…</p>
+                  )}
+                  {!tagLoading && tags.length === 0 && (
+                    <p className="w-full py-8 text-center text-muted-foreground">Няма тагове</p>
                   )}
                   {tags.map((tag) => {
-                    const count = expenses.filter((e) =>
-                      e.tagIds.includes(tag.id)
-                    ).length
+                    const count = expenses.filter((e) => e.tagIds.includes(tag.id)).length
                     return (
                       <div
                         key={tag.id}
@@ -572,17 +551,14 @@ export const Finances = () => {
                       >
                         <TagIcon className="size-3 text-muted-foreground" />
                         <span className="text-sm">{tag.name}</span>
-                        <Badge
-                          variant="secondary"
-                          className="rounded-full text-xs"
-                        >
+                        <Badge variant="secondary" className="rounded-full text-xs">
                           {count}
                         </Badge>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="size-5 rounded-full text-muted-foreground hover:text-destructive"
-                          onClick={() => deleteTag(tag.id)}
+                          onClick={() => removeTag(tag.id)}
                         >
                           <XIcon className="size-3" />
                         </Button>
