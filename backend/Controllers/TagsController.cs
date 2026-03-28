@@ -34,6 +34,13 @@ public class TagsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, UpdateTagRequest request, CancellationToken ct)
+    {
+        TagResponse result = await _tags.UpdateAsync(id, request, GetUserId(), ct);
+        return Ok(result);
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {

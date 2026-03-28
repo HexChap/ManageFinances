@@ -15,6 +15,15 @@ export async function createIncome(request: CreateIncomeRequest): Promise<Income
   return data
 }
 
+export interface UpdateIncomeRequest {
+  value: number
+}
+
+export async function updateIncome(id: number, request: UpdateIncomeRequest): Promise<Income> {
+  const { data } = await api.put<Income>(`/incomes/${id}`, request)
+  return data
+}
+
 export async function deleteIncome(id: number): Promise<void> {
   await api.delete(`/incomes/${id}`)
 }

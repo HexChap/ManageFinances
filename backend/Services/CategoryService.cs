@@ -35,6 +35,17 @@ public class CategoryService
         return categories.Select(c => c.ToResponse()).ToList();
     }
 
+    public async Task<CategoryResponse> UpdateAsync(int id, UpdateCategoryRequest request, int userId, CancellationToken ct = default)
+    {
+        Category category = await _db.Categories.AsTracking().FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId, ct)
+            ?? throw new NotFoundException($"Category {id} not found");
+        category.Name = request.Name;
+        _db.Categories.Update(category);
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Category {Id} updated", id);
+        return category.ToResponse();
+    }
+
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
         Category category = await _db.Categories.FindAsync([id], ct)

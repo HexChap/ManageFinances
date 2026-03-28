@@ -3,8 +3,10 @@ import type { Income } from '../types'
 import {
   getIncomes,
   createIncome,
+  updateIncome,
   deleteIncome,
   type CreateIncomeRequest,
+  type UpdateIncomeRequest,
 } from '../services/incomeService'
 
 export function useIncomes() {
@@ -28,10 +30,15 @@ export function useIncomes() {
     setIncomes((prev) => [created, ...prev])
   }, [])
 
+  const update = useCallback(async (id: number, request: UpdateIncomeRequest) => {
+    const updated = await updateIncome(id, request)
+    setIncomes((prev) => prev.map((i) => (i.id === id ? updated : i)))
+  }, [])
+
   const remove = useCallback(async (id: number) => {
     await deleteIncome(id)
     setIncomes((prev) => prev.filter((i) => i.id !== id))
   }, [])
 
-  return { incomes, loading, error, add, remove }
+  return { incomes, loading, error, add, update, remove }
 }

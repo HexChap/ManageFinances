@@ -34,6 +34,13 @@ public class CategoriesController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, UpdateCategoryRequest request, CancellationToken ct)
+    {
+        CategoryResponse result = await _categories.UpdateAsync(id, request, GetUserId(), ct);
+        return Ok(result);
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {

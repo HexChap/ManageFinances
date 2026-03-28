@@ -15,6 +15,15 @@ export async function createTag(request: CreateTagRequest): Promise<Tag> {
   return data
 }
 
+export interface UpdateTagRequest {
+  name: string
+}
+
+export async function updateTag(id: number, request: UpdateTagRequest): Promise<Tag> {
+  const { data } = await api.put<Tag>(`/tags/${id}`, request)
+  return data
+}
+
 export async function deleteTag(id: number): Promise<void> {
   await api.delete(`/tags/${id}`)
 }

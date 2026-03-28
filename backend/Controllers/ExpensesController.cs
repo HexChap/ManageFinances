@@ -36,6 +36,13 @@ public class ExpensesController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, UpdateExpenseRequest request, CancellationToken ct)
+    {
+        ExpenseResponse result = await _expenses.UpdateAsync(id, request, GetUserId(), ct);
+        return Ok(result);
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {

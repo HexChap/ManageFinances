@@ -58,6 +58,42 @@ public class CategoryServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_ExistingCategory_ReturnsUpdatedName()
+    {
+        CategoryResponse created = await _sut.CreateAsync(new CreateCategoryRequest("Food"), userId: 1);
+
+        CategoryResponse result = await _sut.UpdateAsync(created.Id, new UpdateCategoryRequest("Dining"), userId: 1);
+
+        Assert.Equal(created.Id, result.Id);
+        Assert.Equal("Dining", result.Name);
+        Assert.Equal(1, result.UserId);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MissingCategory_ThrowsNotFoundException()
+    {
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(999, new UpdateCategoryRequest("X"), userId: 1));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_OtherUsersCategory_ThrowsNotFoundException()
+    {
+        CategoryResponse created = await _sut.CreateAsync(new CreateCategoryRequest("Food"), userId: 1);
+
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(created.Id, new UpdateCategoryRequest("Dining"), userId: 2));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_GlobalCategory_ThrowsNotFoundException()
+    {
+        _db.Categories.Add(new Category { Name = "Global" });
+        await _db.SaveChangesAsync();
+        Category global = _db.Categories.Single(c => c.Name == "Global");
+
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(global.Id, new UpdateCategoryRequest("Renamed"), userId: 1));
+    }
+
+    [Fact]
     public async Task DeleteAsync_ExistingCategory_Succeeds()
     {
         CategoryResponse created = await _sut.CreateAsync(new CreateCategoryRequest("Food"), userId: 1);

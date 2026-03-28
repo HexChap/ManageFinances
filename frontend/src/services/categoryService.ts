@@ -15,6 +15,15 @@ export async function createCategory(request: CreateCategoryRequest): Promise<Ca
   return data
 }
 
+export interface UpdateCategoryRequest {
+  name: string
+}
+
+export async function updateCategory(id: number, request: UpdateCategoryRequest): Promise<Category> {
+  const { data } = await api.put<Category>(`/categories/${id}`, request)
+  return data
+}
+
 export async function deleteCategory(id: number): Promise<void> {
   await api.delete(`/categories/${id}`)
 }

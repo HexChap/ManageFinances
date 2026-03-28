@@ -65,6 +65,32 @@ public class TagServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_ExistingTag_ReturnsUpdatedData()
+    {
+        TagResponse created = await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 1);
+
+        TagResponse result = await _sut.UpdateAsync(created.Id, new UpdateTagRequest("Luxury"), userId: 1);
+
+        Assert.Equal(created.Id, result.Id);
+        Assert.Equal("Luxury", result.Name);
+        Assert.Equal(1, result.UserId);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MissingTag_ThrowsNotFoundException()
+    {
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(999, new UpdateTagRequest("X"), userId: 1));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_OtherUsersTag_ThrowsNotFoundException()
+    {
+        TagResponse created = await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 1);
+
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(created.Id, new UpdateTagRequest("Luxury"), userId: 2));
+    }
+
+    [Fact]
     public async Task DeleteAsync_ExistingTag_Succeeds()
     {
         TagResponse created = await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 1);

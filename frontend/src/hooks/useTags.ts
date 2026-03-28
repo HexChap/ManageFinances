@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Tag } from '../types'
-import { getTags, createTag, deleteTag, type CreateTagRequest } from '../services/tagService'
+import { getTags, createTag, updateTag, deleteTag, type CreateTagRequest, type UpdateTagRequest } from '../services/tagService'
 
 export function useTags() {
   const [tags, setTags] = useState<Tag[]>([])
@@ -23,10 +23,15 @@ export function useTags() {
     setTags((prev) => [...prev, created])
   }, [])
 
+  const update = useCallback(async (id: number, request: UpdateTagRequest) => {
+    const updated = await updateTag(id, request)
+    setTags((prev) => prev.map((t) => (t.id === id ? updated : t)))
+  }, [])
+
   const remove = useCallback(async (id: number) => {
     await deleteTag(id)
     setTags((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  return { tags, loading, error, add, remove }
+  return { tags, loading, error, add, update, remove }
 }
