@@ -20,6 +20,7 @@ services:
     volumes:
       - ./backend:/src
       - nuget-cache:/root/.nuget
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
     command: dotnet watch run --project backend.csproj --urls http://+:8080
     environment:
       ASPNETCORE_URLS: http://+:8080
@@ -45,5 +46,6 @@ services:
 volumes:
   pgdata:
   nuget-cache:
+  dataprotection-keys:
   bun-cache:
   frontend-node-modules:
