@@ -11,4 +11,11 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/api": "http://backend:8080",
+      "/openapi": "http://backend:8080",
+      "/scalar": "http://backend:8080",
+    },
+  },
 })

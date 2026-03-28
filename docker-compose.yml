@@ -15,7 +15,12 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    working_dir: /src
+    volumes:
+      - ./backend:/src
+      - nuget-cache:/root/.nuget
+    command: dotnet watch run --project backend.csproj --urls http://+:8080
     environment:
       ASPNETCORE_URLS: http://+:8080
       ASPNETCORE_ENVIRONMENT: Development
@@ -25,11 +30,18 @@ services:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    image: oven/bun:1
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - bun-cache:/root/.bun
+    command: bun run dev --host
     ports:
-      - "80:80"
+      - "5173:5173"
     depends_on:
       - backend
 
 volumes:
   pgdata:
+  nuget-cache:
+  bun-cache:
