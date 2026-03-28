@@ -1,3 +1,4 @@
+import axios from 'axios'
 import api from './api'
 
 export interface AuthUser {
@@ -18,6 +19,11 @@ export async function logout(): Promise<void> {
 }
 
 export async function getMe(): Promise<AuthUser | null> {
-  const { data } = await api.get<AuthUser | null>('/account/me')
-  return data
+  try {
+    const { data } = await api.get<AuthUser>('/manage/info')
+    return data
+  } catch (e) {
+    if (axios.isAxiosError(e) && e.response?.status === 401) return null
+    throw e
+  }
 }

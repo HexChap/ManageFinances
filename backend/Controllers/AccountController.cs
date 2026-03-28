@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -11,25 +10,10 @@ namespace backend.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly SignInManager<AppUser> _signInManager;
-    private readonly UserManager<AppUser> _userManager;
 
-    public AccountController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager)
+    public AccountController(SignInManager<AppUser> signInManager)
     {
         _signInManager = signInManager;
-        _userManager = userManager;
-    }
-
-    [HttpGet("me")]
-    public async Task<IActionResult> Me()
-    {
-        if (User.Identity is not { IsAuthenticated: true })
-            return Ok(null);
-
-        AppUser? user = await _userManager.GetUserAsync(User);
-        if (user is null)
-            return Ok(null);
-
-        return Ok(new { user.Email, isEmailConfirmed = user.EmailConfirmed });
     }
 
     [Authorize]
