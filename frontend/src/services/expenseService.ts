@@ -6,12 +6,11 @@ export type ExpensePeriod = 'All' | 'Today' | 'Month'
 export interface CreateExpenseRequest {
   categoryId: number
   value: number
-  userId: number
   tagIds?: number[]
 }
 
-export async function getExpenses(userId: number, period: ExpensePeriod = 'All'): Promise<Expense[]> {
-  const { data } = await api.get<Expense[]>('/expenses', { params: { userId, period } })
+export async function getExpenses(period: ExpensePeriod = 'All'): Promise<Expense[]> {
+  const { data } = await api.get<Expense[]>('/expenses', { params: { period } })
   return data
 }
 

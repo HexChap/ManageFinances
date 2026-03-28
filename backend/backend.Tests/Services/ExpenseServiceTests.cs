@@ -27,7 +27,7 @@ public class ExpenseServiceTests : IDisposable
     [Fact]
     public async Task CreateAsync_ReturnsCreatedExpense()
     {
-        ExpenseResponse result = await _sut.CreateAsync(new CreateExpenseRequest(1, 25.50m, 1));
+        ExpenseResponse result = await _sut.CreateAsync(new CreateExpenseRequest(1, 25.50m), userId: 1);
 
         Assert.True(result.Id > 0);
         Assert.Equal(25.50m, result.Value);
@@ -38,9 +38,9 @@ public class ExpenseServiceTests : IDisposable
     [Fact]
     public async Task GetByUserAsync_All_ReturnsAllUserExpenses()
     {
-        await _sut.CreateAsync(new CreateExpenseRequest(1, 10m, 1));
-        await _sut.CreateAsync(new CreateExpenseRequest(1, 20m, 1));
-        await _sut.CreateAsync(new CreateExpenseRequest(1, 30m, 2)); // different user
+        await _sut.CreateAsync(new CreateExpenseRequest(1, 10m), userId: 1);
+        await _sut.CreateAsync(new CreateExpenseRequest(1, 20m), userId: 1);
+        await _sut.CreateAsync(new CreateExpenseRequest(1, 30m), userId: 2); // different user
 
         IReadOnlyList<ExpenseResponse> result = await _sut.GetByUserAsync(1, ExpensePeriod.All);
 
@@ -50,7 +50,7 @@ public class ExpenseServiceTests : IDisposable
     [Fact]
     public async Task GetByUserAsync_Today_ReturnsOnlyTodayExpenses()
     {
-        await _sut.CreateAsync(new CreateExpenseRequest(1, 10m, 1));
+        await _sut.CreateAsync(new CreateExpenseRequest(1, 10m), userId: 1);
 
         // Seed an old expense directly
         _db.Expenses.Add(new Expense
@@ -71,7 +71,7 @@ public class ExpenseServiceTests : IDisposable
     [Fact]
     public async Task GetByUserAsync_Month_ReturnsCurrentMonthExpenses()
     {
-        await _sut.CreateAsync(new CreateExpenseRequest(1, 10m, 1));
+        await _sut.CreateAsync(new CreateExpenseRequest(1, 10m), userId: 1);
 
         _db.Expenses.Add(new Expense
         {
@@ -90,7 +90,7 @@ public class ExpenseServiceTests : IDisposable
     [Fact]
     public async Task DeleteAsync_ExistingExpense_Succeeds()
     {
-        ExpenseResponse created = await _sut.CreateAsync(new CreateExpenseRequest(1, 10m, 1));
+        ExpenseResponse created = await _sut.CreateAsync(new CreateExpenseRequest(1, 10m), userId: 1);
 
         await _sut.DeleteAsync(created.Id);
 

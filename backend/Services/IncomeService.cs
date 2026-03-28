@@ -18,9 +18,9 @@ public class IncomeService
         _logger = logger;
     }
 
-    public async Task<IncomeResponse> CreateAsync(CreateIncomeRequest request, CancellationToken ct = default)
+    public async Task<IncomeResponse> CreateAsync(CreateIncomeRequest request, int userId, CancellationToken ct = default)
     {
-        var income = new Income { Value = request.Value, UserId = request.UserId };
+        var income = new Income { Value = request.Value, UserId = userId };
         _db.Incomes.Add(income);
         await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Income {Id} created for user {UserId}", income.Id, income.UserId);

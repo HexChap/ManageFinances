@@ -1,9 +1,12 @@
+using System.Security.Claims;
 using backend.DTOs;
 using backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class CategoriesController : ControllerBase
@@ -15,17 +18,19 @@ public class CategoriesController : ControllerBase
         _categories = categories;
     }
 
+    private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
     [HttpPost]
     public async Task<IActionResult> Create(CreateCategoryRequest request, CancellationToken ct)
     {
-        CategoryResponse result = await _categories.CreateAsync(request, ct);
-        return CreatedAtAction(nameof(GetByUser), new { userId = result.UserId }, result);
+        CategoryResponse result = await _categories.CreateAsync(request, GetUserId(), ct);
+        return CreatedAtAction(nameof(GetByUser), null, result);
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetByUser([FromQuery] int userId, CancellationToken ct)
+    public async Task<IActionResult> GetByUser(CancellationToken ct)
     {
-        IReadOnlyList<CategoryResponse> result = await _categories.GetByUserAsync(userId, ct);
+        IReadOnlyList<CategoryResponse> result = await _categories.GetByUserAsync(GetUserId(), ct);
         return Ok(result);
     }
 

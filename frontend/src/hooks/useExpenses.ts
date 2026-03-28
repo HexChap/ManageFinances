@@ -8,7 +8,7 @@ import {
   type CreateExpenseRequest,
 } from '../services/expenseService'
 
-export function useExpenses(userId: number, period: ExpensePeriod = 'All') {
+export function useExpenses(period: ExpensePeriod = 'All') {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -16,11 +16,11 @@ export function useExpenses(userId: number, period: ExpensePeriod = 'All') {
   const load = useCallback(() => {
     setLoading(true)
     setError(null)
-    getExpenses(userId, period)
+    getExpenses(period)
       .then(setExpenses)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [userId, period])
+  }, [period])
 
   useEffect(() => { load() }, [load])
 

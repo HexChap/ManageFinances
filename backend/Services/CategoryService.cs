@@ -18,9 +18,9 @@ public class CategoryService
         _logger = logger;
     }
 
-    public async Task<CategoryResponse> CreateAsync(CreateCategoryRequest request, CancellationToken ct = default)
+    public async Task<CategoryResponse> CreateAsync(CreateCategoryRequest request, int userId, CancellationToken ct = default)
     {
-        var category = new Category { Name = request.Name, UserId = request.UserId };
+        var category = new Category { Name = request.Name, UserId = userId };
         _db.Categories.Add(category);
         await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Category {Id} '{Name}' created", category.Id, category.Name);

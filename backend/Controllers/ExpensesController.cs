@@ -1,9 +1,12 @@
+using System.Security.Claims;
 using backend.DTOs;
 using backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ExpensesController : ControllerBase
@@ -15,20 +18,21 @@ public class ExpensesController : ControllerBase
         _expenses = expenses;
     }
 
+    private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
     [HttpPost]
     public async Task<IActionResult> Create(CreateExpenseRequest request, CancellationToken ct)
     {
-        ExpenseResponse result = await _expenses.CreateAsync(request, ct);
-        return CreatedAtAction(nameof(GetByUser), new { userId = result.UserId }, result);
+        ExpenseResponse result = await _expenses.CreateAsync(request, GetUserId(), ct);
+        return CreatedAtAction(nameof(GetByUser), null, result);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetByUser(
-        [FromQuery] int userId,
         [FromQuery] ExpensePeriod period = ExpensePeriod.All,
         CancellationToken ct = default)
     {
-        IReadOnlyList<ExpenseResponse> result = await _expenses.GetByUserAsync(userId, period, ct);
+        IReadOnlyList<ExpenseResponse> result = await _expenses.GetByUserAsync(GetUserId(), period, ct);
         return Ok(result);
     }
 

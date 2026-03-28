@@ -22,7 +22,7 @@ public class IncomeServiceTests : IDisposable
     [Fact]
     public async Task CreateAsync_ReturnsCreatedIncome()
     {
-        IncomeResponse result = await _sut.CreateAsync(new CreateIncomeRequest(1500m, 1));
+        IncomeResponse result = await _sut.CreateAsync(new CreateIncomeRequest(1500m), userId: 1);
 
         Assert.True(result.Id > 0);
         Assert.Equal(1500m, result.Value);
@@ -32,9 +32,9 @@ public class IncomeServiceTests : IDisposable
     [Fact]
     public async Task GetByUserAsync_ReturnsOnlyUserIncomes()
     {
-        await _sut.CreateAsync(new CreateIncomeRequest(1000m, 1));
-        await _sut.CreateAsync(new CreateIncomeRequest(2000m, 1));
-        await _sut.CreateAsync(new CreateIncomeRequest(3000m, 2)); // different user
+        await _sut.CreateAsync(new CreateIncomeRequest(1000m), userId: 1);
+        await _sut.CreateAsync(new CreateIncomeRequest(2000m), userId: 1);
+        await _sut.CreateAsync(new CreateIncomeRequest(3000m), userId: 2); // different user
 
         IReadOnlyList<IncomeResponse> result = await _sut.GetByUserAsync(1);
 
@@ -52,7 +52,7 @@ public class IncomeServiceTests : IDisposable
     [Fact]
     public async Task DeleteAsync_ExistingIncome_Succeeds()
     {
-        IncomeResponse created = await _sut.CreateAsync(new CreateIncomeRequest(500m, 1));
+        IncomeResponse created = await _sut.CreateAsync(new CreateIncomeRequest(500m), userId: 1);
 
         await _sut.DeleteAsync(created.Id);
 

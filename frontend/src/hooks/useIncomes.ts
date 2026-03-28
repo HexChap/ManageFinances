@@ -7,7 +7,7 @@ import {
   type CreateIncomeRequest,
 } from '../services/incomeService'
 
-export function useIncomes(userId: number) {
+export function useIncomes() {
   const [incomes, setIncomes] = useState<Income[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -15,11 +15,11 @@ export function useIncomes(userId: number) {
   const load = useCallback(() => {
     setLoading(true)
     setError(null)
-    getIncomes(userId)
+    getIncomes()
       .then(setIncomes)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [userId])
+  }, [])
 
   useEffect(() => { load() }, [load])
 

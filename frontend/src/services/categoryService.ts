@@ -3,11 +3,10 @@ import type { Category } from '../types'
 
 export interface CreateCategoryRequest {
   name: string
-  userId?: number | null
 }
 
-export async function getCategories(userId: number): Promise<Category[]> {
-  const { data } = await api.get<Category[]>('/categories', { params: { userId } })
+export async function getCategories(): Promise<Category[]> {
+  const { data } = await api.get<Category[]>('/categories')
   return data
 }
 

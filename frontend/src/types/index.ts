@@ -1,7 +1,6 @@
-export interface User {
-  id: number
-  name: string
+export interface AuthUser {
   email: string
+  isEmailConfirmed: boolean
 }
 
 export interface Category {

@@ -18,6 +18,7 @@ services:
     build: ./backend
     environment:
       ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Host=db;Database=ManageFinancesITKariera;Username=postgres;Password=postgres"
     depends_on:
       db:

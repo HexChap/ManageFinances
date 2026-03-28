@@ -3,11 +3,10 @@ import type { Income } from '../types'
 
 export interface CreateIncomeRequest {
   value: number
-  userId: number
 }
 
-export async function getIncomes(userId: number): Promise<Income[]> {
-  const { data } = await api.get<Income[]>('/incomes', { params: { userId } })
+export async function getIncomes(): Promise<Income[]> {
+  const { data } = await api.get<Income[]>('/incomes')
   return data
 }
 

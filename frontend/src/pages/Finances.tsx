@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   PlusIcon,
   Trash2Icon,
@@ -7,18 +8,18 @@ import {
   TrendingUpIcon,
   TrendingDownIcon,
   XIcon,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -26,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from '@/components/ui/table'
 import {
   Dialog,
   DialogContent,
@@ -34,24 +35,26 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useExpenses } from "@/hooks/useExpenses"
-import { useIncomes } from "@/hooks/useIncomes"
-import { useCategories } from "@/hooks/useCategories"
-import { useTags } from "@/hooks/useTags"
-
-const MOCK_USER_ID = 1
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useExpenses } from '@/hooks/useExpenses'
+import { useIncomes } from '@/hooks/useIncomes'
+import { useCategories } from '@/hooks/useCategories'
+import { useTags } from '@/hooks/useTags'
+import { useAuth } from '@/hooks/useAuth'
 
 export const Finances = () => {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
   const {
     expenses,
     loading: expLoading,
     error: expError,
     add: addExpense,
     remove: removeExpense,
-  } = useExpenses(MOCK_USER_ID)
+  } = useExpenses()
 
   const {
     incomes,
@@ -59,7 +62,7 @@ export const Finances = () => {
     error: incError,
     add: addIncome,
     remove: removeIncome,
-  } = useIncomes(MOCK_USER_ID)
+  } = useIncomes()
 
   const {
     categories,
@@ -67,7 +70,7 @@ export const Finances = () => {
     error: catError,
     add: addCategory,
     remove: removeCategory,
-  } = useCategories(MOCK_USER_ID)
+  } = useCategories()
 
   const {
     tags,
@@ -75,33 +78,33 @@ export const Finances = () => {
     error: tagError,
     add: addTag,
     remove: removeTag,
-  } = useTags(MOCK_USER_ID)
+  } = useTags()
 
-  const [catName, setCatName] = useState("")
+  const [catName, setCatName] = useState('')
   const [catOpen, setCatOpen] = useState(false)
 
-  const [tagName, setTagName] = useState("")
+  const [tagName, setTagName] = useState('')
   const [tagOpen, setTagOpen] = useState(false)
 
-  const [expValue, setExpValue] = useState("")
-  const [expCatId, setExpCatId] = useState("")
+  const [expValue, setExpValue] = useState('')
+  const [expCatId, setExpCatId] = useState('')
   const [expTagIds, setExpTagIds] = useState<number[]>([])
   const [expOpen, setExpOpen] = useState(false)
 
-  const [incValue, setIncValue] = useState("")
+  const [incValue, setIncValue] = useState('')
   const [incOpen, setIncOpen] = useState(false)
 
   const handleAddCategory = async () => {
     if (!catName.trim()) return
-    await addCategory({ name: catName.trim(), userId: MOCK_USER_ID })
-    setCatName("")
+    await addCategory({ name: catName.trim() })
+    setCatName('')
     setCatOpen(false)
   }
 
   const handleAddTag = async () => {
     if (!tagName.trim()) return
-    await addTag({ name: tagName.trim(), userId: MOCK_USER_ID })
-    setTagName("")
+    await addTag({ name: tagName.trim() })
+    setTagName('')
     setTagOpen(false)
   }
 
@@ -111,11 +114,10 @@ export const Finances = () => {
     await addExpense({
       value: val,
       categoryId: parseInt(expCatId),
-      userId: MOCK_USER_ID,
       tagIds: expTagIds,
     })
-    setExpValue("")
-    setExpCatId("")
+    setExpValue('')
+    setExpCatId('')
     setExpTagIds([])
     setExpOpen(false)
   }
@@ -123,9 +125,14 @@ export const Finances = () => {
   const handleAddIncome = async () => {
     const val = parseFloat(incValue)
     if (isNaN(val)) return
-    await addIncome({ value: val, userId: MOCK_USER_ID })
-    setIncValue("")
+    await addIncome({ value: val })
+    setIncValue('')
     setIncOpen(false)
+  }
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login')
   }
 
   const toggleExpTag = (id: number) =>
@@ -134,9 +141,10 @@ export const Finances = () => {
     )
 
   const getCategoryName = (id: number) =>
-    categories.find((c) => c.id === id)?.name ?? "—"
+    categories.find((c) => c.id === id)?.name ?? '—'
 
-  const getTagName = (id: number) => tags.find((t) => t.id === id)?.name ?? ""
+  const getTagName = (id: number) =>
+    tags.find((t) => t.id === id)?.name ?? ''
 
   const totalExpenses = expenses.reduce((s, e) => s + e.value, 0)
   const totalIncomes = incomes.reduce((s, i) => s + i.value, 0)
@@ -145,18 +153,23 @@ export const Finances = () => {
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-5xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Финансов мениджър
-          </h1>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Финансов мениджър
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">{user?.email}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            Изход
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <TrendingUpIcon className="size-4 text-emerald-500" /> Общи
-                приходи
+                <TrendingUpIcon className="size-4 text-emerald-500" /> Общи приходи
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -168,8 +181,7 @@ export const Finances = () => {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <TrendingDownIcon className="size-4 text-rose-500" /> Общи
-                разходи
+                <TrendingDownIcon className="size-4 text-rose-500" /> Общи разходи
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -185,10 +197,8 @@ export const Finances = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p
-                className={`text-2xl font-semibold ${balance >= 0 ? "text-emerald-600" : "text-rose-600"}`}
-              >
-                {balance >= 0 ? "+" : ""}${balance.toFixed(2)}
+              <p className={`text-2xl font-semibold ${balance >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {balance >= 0 ? '+' : ''}${balance.toFixed(2)}
               </p>
             </CardContent>
           </Card>
@@ -202,6 +212,7 @@ export const Finances = () => {
             <TabsTrigger value="tags">Тагове</TabsTrigger>
           </TabsList>
 
+          {/* РАЗХОДИ */}
           <TabsContent value="expenses" className="mt-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -249,11 +260,7 @@ export const Finances = () => {
                             {tags.map((t) => (
                               <Badge
                                 key={t.id}
-                                variant={
-                                  expTagIds.includes(t.id)
-                                    ? "default"
-                                    : "outline"
-                                }
+                                variant={expTagIds.includes(t.id) ? 'default' : 'outline'}
                                 className="cursor-pointer select-none"
                                 onClick={() => toggleExpTag(t.id)}
                               >
@@ -272,9 +279,7 @@ export const Finances = () => {
               </CardHeader>
               <CardContent className="p-0">
                 {expError && (
-                  <p className="px-4 py-3 text-sm text-destructive">
-                    {expError}
-                  </p>
+                  <p className="px-4 py-3 text-sm text-destructive">{expError}</p>
                 )}
                 <Table>
                   <TableHeader>
@@ -290,52 +295,38 @@ export const Finances = () => {
                   <TableBody>
                     {expLoading && (
                       <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="py-8 text-center text-muted-foreground"
-                        >
+                        <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                           Зареждане…
                         </TableCell>
                       </TableRow>
                     )}
                     {!expLoading && expenses.length === 0 && (
                       <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="py-8 text-center text-muted-foreground"
-                        >
+                        <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                           Няма разходи
                         </TableCell>
                       </TableRow>
                     )}
                     {expenses.map((exp) => (
                       <TableRow key={exp.id}>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {exp.id}
-                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{exp.id}</TableCell>
                         <TableCell className="font-medium text-rose-600">
                           -${exp.value.toFixed(2)}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">
-                            {getCategoryName(exp.categoryId)}
-                          </Badge>
+                          <Badge variant="secondary">{getCategoryName(exp.categoryId)}</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {exp.tagIds.map((tid) => (
-                              <Badge
-                                key={tid}
-                                variant="outline"
-                                className="text-xs"
-                              >
+                              <Badge key={tid} variant="outline" className="text-xs">
                                 {getTagName(tid)}
                               </Badge>
                             ))}
                           </div>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
-                          {new Date(exp.createdAt).toLocaleDateString("bg-BG")}
+                          {new Date(exp.createdAt).toLocaleDateString('bg-BG')}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -390,9 +381,7 @@ export const Finances = () => {
               </CardHeader>
               <CardContent className="p-0">
                 {incError && (
-                  <p className="px-4 py-3 text-sm text-destructive">
-                    {incError}
-                  </p>
+                  <p className="px-4 py-3 text-sm text-destructive">{incError}</p>
                 )}
                 <Table>
                   <TableHeader>
@@ -406,34 +395,26 @@ export const Finances = () => {
                   <TableBody>
                     {incLoading && (
                       <TableRow>
-                        <TableCell
-                          colSpan={4}
-                          className="py-8 text-center text-muted-foreground"
-                        >
+                        <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
                           Зареждане…
                         </TableCell>
                       </TableRow>
                     )}
                     {!incLoading && incomes.length === 0 && (
                       <TableRow>
-                        <TableCell
-                          colSpan={4}
-                          className="py-8 text-center text-muted-foreground"
-                        >
+                        <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
                           Няма приходи
                         </TableCell>
                       </TableRow>
                     )}
                     {incomes.map((inc) => (
                       <TableRow key={inc.id}>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {inc.id}
-                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{inc.id}</TableCell>
                         <TableCell className="font-medium text-emerald-600">
                           +${inc.value.toFixed(2)}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
-                          {new Date(inc.createdAt).toLocaleDateString("bg-BG")}
+                          {new Date(inc.createdAt).toLocaleDateString('bg-BG')}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -476,9 +457,7 @@ export const Finances = () => {
                           placeholder="напр. Хранителни стоки"
                           value={catName}
                           onChange={(e) => setCatName(e.target.value)}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleAddCategory()
-                          }
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                         />
                       </div>
                     </div>
@@ -494,19 +473,13 @@ export const Finances = () => {
                 )}
                 <div className="space-y-2">
                   {catLoading && (
-                    <p className="py-8 text-center text-muted-foreground">
-                      Зареждане…
-                    </p>
+                    <p className="py-8 text-center text-muted-foreground">Зареждане…</p>
                   )}
                   {!catLoading && categories.length === 0 && (
-                    <p className="py-8 text-center text-muted-foreground">
-                      Няма категории
-                    </p>
+                    <p className="py-8 text-center text-muted-foreground">Няма категории</p>
                   )}
                   {categories.map((cat) => {
-                    const count = expenses.filter(
-                      (e) => e.categoryId === cat.id
-                    ).length
+                    const count = expenses.filter((e) => e.categoryId === cat.id).length
                     return (
                       <div
                         key={cat.id}
@@ -514,11 +487,9 @@ export const Finances = () => {
                       >
                         <div className="flex items-center gap-3">
                           <FolderIcon className="size-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">
-                            {cat.name}
-                          </span>
+                          <span className="text-sm font-medium">{cat.name}</span>
                           <Badge variant="secondary" className="text-xs">
-                            {count} {count === 1 ? "разход" : "разхода"}
+                            {count} {count === 1 ? 'разход' : 'разхода'}
                           </Badge>
                         </div>
                         <Button
@@ -560,7 +531,7 @@ export const Finances = () => {
                           placeholder="напр. основно"
                           value={tagName}
                           onChange={(e) => setTagName(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
                         />
                       </div>
                     </div>
@@ -576,19 +547,13 @@ export const Finances = () => {
                 )}
                 <div className="flex flex-wrap gap-2">
                   {tagLoading && (
-                    <p className="w-full py-8 text-center text-muted-foreground">
-                      Зареждане…
-                    </p>
+                    <p className="w-full py-8 text-center text-muted-foreground">Зареждане…</p>
                   )}
                   {!tagLoading && tags.length === 0 && (
-                    <p className="w-full py-8 text-center text-muted-foreground">
-                      Няма тагове
-                    </p>
+                    <p className="w-full py-8 text-center text-muted-foreground">Няма тагове</p>
                   )}
                   {tags.map((tag) => {
-                    const count = expenses.filter((e) =>
-                      e.tagIds.includes(tag.id)
-                    ).length
+                    const count = expenses.filter((e) => e.tagIds.includes(tag.id)).length
                     return (
                       <div
                         key={tag.id}
@@ -596,10 +561,7 @@ export const Finances = () => {
                       >
                         <TagIcon className="size-3 text-muted-foreground" />
                         <span className="text-sm">{tag.name}</span>
-                        <Badge
-                          variant="secondary"
-                          className="rounded-full text-xs"
-                        >
+                        <Badge variant="secondary" className="rounded-full text-xs">
                           {count}
                         </Badge>
                         <Button

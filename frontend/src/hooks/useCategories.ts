@@ -7,7 +7,7 @@ import {
   type CreateCategoryRequest,
 } from '../services/categoryService'
 
-export function useCategories(userId: number) {
+export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -15,11 +15,11 @@ export function useCategories(userId: number) {
   const load = useCallback(() => {
     setLoading(true)
     setError(null)
-    getCategories(userId)
+    getCategories()
       .then(setCategories)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [userId])
+  }, [])
 
   useEffect(() => { load() }, [load])
 

@@ -18,9 +18,9 @@ public class TagService
         _logger = logger;
     }
 
-    public async Task<TagResponse> CreateAsync(CreateTagRequest request, CancellationToken ct = default)
+    public async Task<TagResponse> CreateAsync(CreateTagRequest request, int userId, CancellationToken ct = default)
     {
-        var tag = new Tag { Name = request.Name, UserId = request.UserId };
+        var tag = new Tag { Name = request.Name, UserId = userId };
         _db.Tags.Add(tag);
         await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Tag {Id} created for user {UserId}", tag.Id, tag.UserId);

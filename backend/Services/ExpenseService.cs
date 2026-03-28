@@ -20,13 +20,13 @@ public class ExpenseService
         _logger = logger;
     }
 
-    public async Task<ExpenseResponse> CreateAsync(CreateExpenseRequest request, CancellationToken ct = default)
+    public async Task<ExpenseResponse> CreateAsync(CreateExpenseRequest request, int userId, CancellationToken ct = default)
     {
         var expense = new Expense
         {
             CategoryId = request.CategoryId,
             Value = request.Value,
-            UserId = request.UserId
+            UserId = userId
         };
 
         if (request.TagIds is { Count: > 0 })

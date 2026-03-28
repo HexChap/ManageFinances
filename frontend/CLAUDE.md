@@ -144,6 +144,8 @@ Routes are defined in `App.tsx`. Add new routes there.
 
 - Protected routes (require auth) get their own wrapper component — do not duplicate auth checks in every page
 - Use `useNavigate` for programmatic navigation — never `window.location.href`
+- Unmatched routes fall through to `pages/NotFound.tsx` via `path="*"` in `App.tsx`
+- `ErrorBoundary` in `main.tsx` catches render errors app-wide; it resets on user action
 
 ---
 

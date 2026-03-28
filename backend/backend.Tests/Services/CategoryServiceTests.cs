@@ -1,6 +1,7 @@
 using backend.Data;
 using backend.DTOs;
 using backend.Exceptions;
+using backend.Models;
 using backend.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -22,27 +23,22 @@ public class CategoryServiceTests : IDisposable
     [Fact]
     public async Task CreateAsync_ReturnsCreatedCategory()
     {
-        CategoryResponse result = await _sut.CreateAsync(new CreateCategoryRequest("Food", null));
+        CategoryResponse result = await _sut.CreateAsync(new CreateCategoryRequest("Food"), userId: 1);
 
         Assert.True(result.Id > 0);
         Assert.Equal("Food", result.Name);
-        Assert.Null(result.UserId);
-    }
-
-    [Fact]
-    public async Task CreateAsync_WithUserId_AssignsUser()
-    {
-        CategoryResponse result = await _sut.CreateAsync(new CreateCategoryRequest("Transport", 42));
-
-        Assert.Equal(42, result.UserId);
+        Assert.Equal(1, result.UserId);
     }
 
     [Fact]
     public async Task GetByUserAsync_ReturnsUserSpecificAndGlobalCategories()
     {
-        await _sut.CreateAsync(new CreateCategoryRequest("Global", null));
-        await _sut.CreateAsync(new CreateCategoryRequest("Mine", 1));
-        await _sut.CreateAsync(new CreateCategoryRequest("OtherUser", 2));
+        // Global category seeded directly (UserId = null, not creatable via API)
+        _db.Categories.Add(new Category { Name = "Global" });
+        await _db.SaveChangesAsync();
+
+        await _sut.CreateAsync(new CreateCategoryRequest("Mine"), userId: 1);
+        await _sut.CreateAsync(new CreateCategoryRequest("OtherUser"), userId: 2);
 
         IReadOnlyList<CategoryResponse> result = await _sut.GetByUserAsync(1);
 
@@ -54,7 +50,7 @@ public class CategoryServiceTests : IDisposable
     [Fact]
     public async Task GetByUserAsync_ExcludesOtherUsersCategories()
     {
-        await _sut.CreateAsync(new CreateCategoryRequest("OtherUser", 99));
+        await _sut.CreateAsync(new CreateCategoryRequest("OtherUser"), userId: 99);
 
         IReadOnlyList<CategoryResponse> result = await _sut.GetByUserAsync(1);
 
@@ -64,7 +60,7 @@ public class CategoryServiceTests : IDisposable
     [Fact]
     public async Task DeleteAsync_ExistingCategory_Succeeds()
     {
-        CategoryResponse created = await _sut.CreateAsync(new CreateCategoryRequest("Food", null));
+        CategoryResponse created = await _sut.CreateAsync(new CreateCategoryRequest("Food"), userId: 1);
 
         await _sut.DeleteAsync(created.Id);
 

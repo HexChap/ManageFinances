@@ -3,11 +3,10 @@ import type { Tag } from '../types'
 
 export interface CreateTagRequest {
   name: string
-  userId: number
 }
 
-export async function getTags(userId: number): Promise<Tag[]> {
-  const { data } = await api.get<Tag[]>('/tags', { params: { userId } })
+export async function getTags(): Promise<Tag[]> {
+  const { data } = await api.get<Tag[]>('/tags')
   return data
 }
 

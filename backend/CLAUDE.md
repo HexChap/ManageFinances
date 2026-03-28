@@ -9,6 +9,7 @@ ASP.NET Core 10 REST API with PostgreSQL and EF Core.
 ```
 Controllers/     # Thin HTTP handlers only — no business logic
 Services/        # Business logic, one class per domain concept
+                 # Tags have a many-to-many with Expenses (ExpenseTag join table)
 Data/            # DbContext only
 Models/          # EF Core entities
 DTOs/            # Request and response types (records)
@@ -208,6 +209,12 @@ Test project lives at `backend.Tests/` (inside `backend/`). It references `backe
 `backend.csproj` excludes `backend.Tests/**` via `<Compile Remove>` — required because the test project is a subdirectory of the API project.
 
 `ExecuteDeleteAsync` is **not** supported by the InMemory provider — use `FindAsync + Remove` for single-entity deletes so tests work without a real DB.
+
+---
+
+## Known Warnings
+
+The test project produces an MSB3277 warning about conflicting `Microsoft.EntityFrameworkCore.Relational` versions. This is a pre-existing package version skew between `backend.csproj` and `backend.Tests.csproj` — not caused by new code. The build succeeds; ignore it.
 
 ---
 

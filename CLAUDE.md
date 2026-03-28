@@ -22,6 +22,20 @@ frontend/             # React + Vite SPA
 dotnet test backend/ManageFinances.slnx
 ```
 
+```bash
+# Frontend
+cd frontend && bun run dev         # dev server (proxied via Nginx in Docker)
+bun run typecheck && bun run lint  # run before committing
+```
+
+```bash
+# EF Core migrations
+cd backend
+dotnet ef migrations add <Name>
+dotnet ef database update
+```
+
 ## See Also
 
 - `backend/CLAUDE.md` — ASP.NET Core coding rules and EF Core patterns
+- `frontend/CLAUDE.md` — React/TypeScript rules, axios patterns, hook conventions

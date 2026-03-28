@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Tag } from '../types'
 import { getTags, createTag, deleteTag, type CreateTagRequest } from '../services/tagService'
 
-export function useTags(userId: number) {
+export function useTags() {
   const [tags, setTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -10,11 +10,11 @@ export function useTags(userId: number) {
   const load = useCallback(() => {
     setLoading(true)
     setError(null)
-    getTags(userId)
+    getTags()
       .then(setTags)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [userId])
+  }, [])
 
   useEffect(() => { load() }, [load])
 

@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace backend.Models;
 
-public class User
+public class AppUser : IdentityUser<int>
 {
-    public int Id { get; set; }
     public string? Timezone { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
