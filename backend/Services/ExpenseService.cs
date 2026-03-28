@@ -28,6 +28,15 @@ public class ExpenseService
             Value = request.Value,
             UserId = request.UserId
         };
+
+        if (request.TagIds is { Count: > 0 })
+        {
+            expense.Tags = await _db.Tags
+                .AsTracking()
+                .Where(t => request.TagIds.Contains(t.Id))
+                .ToListAsync(ct);
+        }
+
         _db.Expenses.Add(expense);
         await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Expense {Id} created for user {UserId}", expense.Id, expense.UserId);
@@ -37,7 +46,9 @@ public class ExpenseService
     public async Task<IReadOnlyList<ExpenseResponse>> GetByUserAsync(
         int userId, ExpensePeriod period, CancellationToken ct = default)
     {
-        IQueryable<Expense> query = _db.Expenses.Where(e => e.UserId == userId);
+        IQueryable<Expense> query = _db.Expenses
+            .Include(e => e.Tags)
+            .Where(e => e.UserId == userId);
 
         query = period switch
         {

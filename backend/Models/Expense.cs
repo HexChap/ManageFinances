@@ -9,4 +9,5 @@ public class Expense
     public int UserId { get; set; }
     public User User { get; set; } = null!; // always set via FK
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public ICollection<Tag> Tags { get; set; } = [];
 }
