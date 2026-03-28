@@ -37,9 +37,10 @@ public class CategoryService
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        int deleted = await _db.Categories.Where(c => c.Id == id).ExecuteDeleteAsync(ct);
-        if (deleted == 0)
-            throw new NotFoundException($"Category {id} not found");
+        Category category = await _db.Categories.FindAsync([id], ct)
+            ?? throw new NotFoundException($"Category {id} not found");
+        _db.Categories.Remove(category);
+        await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Category {Id} deleted", id);
     }
 }

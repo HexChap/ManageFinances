@@ -54,9 +54,10 @@ public class ExpenseService
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        int deleted = await _db.Expenses.Where(e => e.Id == id).ExecuteDeleteAsync(ct);
-        if (deleted == 0)
-            throw new NotFoundException($"Expense {id} not found");
+        Expense expense = await _db.Expenses.FindAsync([id], ct)
+            ?? throw new NotFoundException($"Expense {id} not found");
+        _db.Expenses.Remove(expense);
+        await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Expense {Id} deleted", id);
     }
 }

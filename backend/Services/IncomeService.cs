@@ -37,9 +37,10 @@ public class IncomeService
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        int deleted = await _db.Incomes.Where(i => i.Id == id).ExecuteDeleteAsync(ct);
-        if (deleted == 0)
-            throw new NotFoundException($"Income {id} not found");
+        Income income = await _db.Incomes.FindAsync([id], ct)
+            ?? throw new NotFoundException($"Income {id} not found");
+        _db.Incomes.Remove(income);
+        await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Income {Id} deleted", id);
     }
 }
