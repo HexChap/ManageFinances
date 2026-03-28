@@ -22,19 +22,19 @@ public class TagServiceTests : IDisposable
     [Fact]
     public async Task CreateAsync_ReturnsCorrectData()
     {
-        TagResponse result = await _sut.CreateAsync(new CreateTagRequest("Essential", null));
+        TagResponse result = await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 1);
 
         Assert.True(result.Id > 0);
         Assert.Equal("Essential", result.Name);
-        Assert.Equal(1, result.UserId); 
-    } 
+        Assert.Equal(1, result.UserId);
+    }
 
     [Fact]
     public async Task GetByUserAsync_ReturnsAllTagsForUser()
     {
-        await _sut.CreateAsync(new CreateTagRequest("Essential", 1));
-        await _sut.CreateAsync(new CreateTagRequest("Recurring", 1));
-        await _sut.CreateAsync(new CreateTagRequest("One-time", 1));
+        await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 1);
+        await _sut.CreateAsync(new CreateTagRequest("Recurring"), userId: 1);
+        await _sut.CreateAsync(new CreateTagRequest("One-time"), userId: 1);
 
         IReadOnlyList<TagResponse> result = await _sut.GetByUserAsync(1);
 
@@ -42,14 +42,37 @@ public class TagServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetByUserAsync_ExcludesOtherUsersTag()
+    {
+        await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 1);
+        await _sut.CreateAsync(new CreateTagRequest("OtherUser"), userId: 2);
+
+        IReadOnlyList<TagResponse> result = await _sut.GetByUserAsync(1);
+
+        Assert.Equal(1, result.Count);
+        Assert.Contains(result, t => t.Name == "Essential");
+    }
+
+    [Fact]
     public async Task CreateAsync_SameNameDifferentUsers_BothSucceed()
     {
-        TagResponse user1Tag = await _sut.CreateAsync(new CreateTagRequest("Essential", 1));
-        TagResponse user2Tag = await _sut.CreateAsync(new CreateTagRequest("Essential", 2));
+        TagResponse user1Tag = await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 1);
+        TagResponse user2Tag = await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 2);
 
         Assert.Equal("Essential", user1Tag.Name);
         Assert.Equal("Essential", user2Tag.Name);
         Assert.NotEqual(user1Tag.Id, user2Tag.Id);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ExistingTag_Succeeds()
+    {
+        TagResponse created = await _sut.CreateAsync(new CreateTagRequest("Essential"), userId: 1);
+
+        await _sut.DeleteAsync(created.Id);
+
+        IReadOnlyList<TagResponse> remaining = await _sut.GetByUserAsync(1);
+        Assert.Empty(remaining);
     }
 
     [Fact]
