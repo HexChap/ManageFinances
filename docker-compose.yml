@@ -34,8 +34,9 @@ services:
     working_dir: /app
     volumes:
       - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
       - bun-cache:/root/.bun
-    command: bun run dev --host
+    command: sh -c "bun install && bun run dev --host"
     ports:
       - "5173:5173"
     depends_on:
@@ -45,3 +46,4 @@ volumes:
   pgdata:
   nuget-cache:
   bun-cache:
+  frontend-node-modules:
