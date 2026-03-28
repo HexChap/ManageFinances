@@ -88,6 +88,35 @@ public class ExpenseServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_ExistingExpense_ReturnsUpdatedData()
+    {
+        _db.Categories.Add(new Category { Id = 2, Name = "Transport" });
+        await _db.SaveChangesAsync();
+        ExpenseResponse created = await _sut.CreateAsync(new CreateExpenseRequest(1, 25m), userId: 1);
+
+        ExpenseResponse result = await _sut.UpdateAsync(created.Id, new UpdateExpenseRequest(2, 50m), userId: 1);
+
+        Assert.Equal(created.Id, result.Id);
+        Assert.Equal(2, result.CategoryId);
+        Assert.Equal(50m, result.Value);
+        Assert.Empty(result.TagIds);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MissingExpense_ThrowsNotFoundException()
+    {
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(999, new UpdateExpenseRequest(1, 10m), userId: 1));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_OtherUsersExpense_ThrowsNotFoundException()
+    {
+        ExpenseResponse created = await _sut.CreateAsync(new CreateExpenseRequest(1, 25m), userId: 1);
+
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(created.Id, new UpdateExpenseRequest(1, 50m), userId: 2));
+    }
+
+    [Fact]
     public async Task DeleteAsync_ExistingExpense_Succeeds()
     {
         ExpenseResponse created = await _sut.CreateAsync(new CreateExpenseRequest(1, 10m), userId: 1);

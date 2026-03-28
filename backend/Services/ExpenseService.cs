@@ -63,6 +63,26 @@ public class ExpenseService
         return expenses.Select(e => e.ToResponse()).ToList();
     }
 
+    public async Task<ExpenseResponse> UpdateAsync(int id, UpdateExpenseRequest request, int userId, CancellationToken ct = default)
+    {
+        Expense expense = await _db.Expenses
+            .AsTracking()
+            .Include(e => e.Tags)
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, ct)
+            ?? throw new NotFoundException($"Expense {id} not found");
+
+        expense.CategoryId = request.CategoryId;
+        expense.Value = request.Value;
+        expense.Tags = request.TagIds is { Count: > 0 }
+            ? await _db.Tags.AsTracking().Where(t => request.TagIds.Contains(t.Id)).ToListAsync(ct)
+            : [];
+
+        _db.Expenses.Update(expense);
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Expense {Id} updated", id);
+        return expense.ToResponse();
+    }
+
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
         Expense expense = await _db.Expenses.FindAsync([id], ct)

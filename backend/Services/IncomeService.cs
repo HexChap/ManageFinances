@@ -35,6 +35,17 @@ public class IncomeService
         return incomes.Select(i => i.ToResponse()).ToList();
     }
 
+    public async Task<IncomeResponse> UpdateAsync(int id, UpdateIncomeRequest request, int userId, CancellationToken ct = default)
+    {
+        Income income = await _db.Incomes.AsTracking().FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId, ct)
+            ?? throw new NotFoundException($"Income {id} not found");
+        income.Value = request.Value;
+        _db.Incomes.Update(income);
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Income {Id} updated", id);
+        return income.ToResponse();
+    }
+
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
         Income income = await _db.Incomes.FindAsync([id], ct)

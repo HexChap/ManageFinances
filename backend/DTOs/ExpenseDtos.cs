@@ -8,4 +8,10 @@ public record CreateExpenseRequest(
     IReadOnlyList<int>? TagIds = null
 );
 
+public record UpdateExpenseRequest(
+    [Range(1, int.MaxValue)] int CategoryId,
+    [Range(0.01, double.MaxValue, ErrorMessage = "Value must be positive")] decimal Value,
+    IReadOnlyList<int>? TagIds = null
+);
+
 public record ExpenseResponse(int Id, int CategoryId, decimal Value, int UserId, DateTime CreatedAt, IReadOnlyList<int> TagIds);

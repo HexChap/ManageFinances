@@ -35,6 +35,17 @@ public class TagService
         return tags.Select(t => t.ToResponse()).ToList();
     }
 
+    public async Task<TagResponse> UpdateAsync(int id, UpdateTagRequest request, int userId, CancellationToken ct = default)
+    {
+        Tag tag = await _db.Tags.AsTracking().FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId, ct)
+            ?? throw new NotFoundException($"Tag {id} not found");
+        tag.Name = request.Name;
+        _db.Tags.Update(tag);
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Tag {Id} updated", id);
+        return tag.ToResponse();
+    }
+
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
         Tag tag = await _db.Tags.FindAsync([id], ct)

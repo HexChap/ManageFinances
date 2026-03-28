@@ -19,6 +19,17 @@ export async function createExpense(request: CreateExpenseRequest): Promise<Expe
   return data
 }
 
+export interface UpdateExpenseRequest {
+  categoryId: number
+  value: number
+  tagIds?: number[]
+}
+
+export async function updateExpense(id: number, request: UpdateExpenseRequest): Promise<Expense> {
+  const { data } = await api.put<Expense>(`/expenses/${id}`, request)
+  return data
+}
+
 export async function deleteExpense(id: number): Promise<void> {
   await api.delete(`/expenses/${id}`)
 }

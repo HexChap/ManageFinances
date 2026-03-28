@@ -50,6 +50,32 @@ public class IncomeServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_ExistingIncome_ReturnsUpdatedValue()
+    {
+        IncomeResponse created = await _sut.CreateAsync(new CreateIncomeRequest(1500m), userId: 1);
+
+        IncomeResponse result = await _sut.UpdateAsync(created.Id, new UpdateIncomeRequest(2500m), userId: 1);
+
+        Assert.Equal(created.Id, result.Id);
+        Assert.Equal(2500m, result.Value);
+        Assert.Equal(1, result.UserId);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MissingIncome_ThrowsNotFoundException()
+    {
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(999, new UpdateIncomeRequest(100m), userId: 1));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_OtherUsersIncome_ThrowsNotFoundException()
+    {
+        IncomeResponse created = await _sut.CreateAsync(new CreateIncomeRequest(1500m), userId: 1);
+
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.UpdateAsync(created.Id, new UpdateIncomeRequest(2500m), userId: 2));
+    }
+
+    [Fact]
     public async Task DeleteAsync_ExistingIncome_Succeeds()
     {
         IncomeResponse created = await _sut.CreateAsync(new CreateIncomeRequest(500m), userId: 1);

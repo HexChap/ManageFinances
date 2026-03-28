@@ -34,6 +34,13 @@ public class IncomesController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, UpdateIncomeRequest request, CancellationToken ct)
+    {
+        IncomeResponse result = await _incomes.UpdateAsync(id, request, GetUserId(), ct);
+        return Ok(result);
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
