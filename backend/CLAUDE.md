@@ -12,6 +12,8 @@ Services/        # Business logic, one class per domain concept
 Data/            # DbContext only
 Models/          # EF Core entities
 DTOs/            # Request and response types (records)
+Mappings/        # Explicit .ToResponse() extension methods per entity
+Exceptions/      # NotFoundException + GlobalExceptionHandler
 ```
 
 Add a `Services/` layer before adding any logic beyond simple CRUD. Controllers call services; services own business logic and talk to the DB.
