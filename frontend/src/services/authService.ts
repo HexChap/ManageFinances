@@ -17,7 +17,7 @@ export async function logout(): Promise<void> {
   await api.post('/account/logout')
 }
 
-export async function getMe(): Promise<AuthUser> {
-  const { data } = await api.get<AuthUser>('/manage/info')
+export async function getMe(): Promise<AuthUser | null> {
+  const { data } = await api.get<AuthUser | null>('/account/me')
   return data
 }
