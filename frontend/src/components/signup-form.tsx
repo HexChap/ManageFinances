@@ -23,16 +23,16 @@ export const SignupForm = ({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
+          <CardTitle className="text-xl">Създайте акаунт</CardTitle>
           <CardDescription>
-            Enter your email below to create your account
+            Въведете имейла си по-долу, за да създадете акаунт
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">Имейл</FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -43,24 +43,22 @@ export const SignupForm = ({
               <Field>
                 <Field className="grid grid-cols-2 gap-4">
                   <Field>
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <FieldLabel htmlFor="password">Парола</FieldLabel>
                     <Input id="password" type="password" required />
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="confirm-password">
-                      Confirm Password
+                      Потвърди паролата
                     </FieldLabel>
                     <Input id="confirm-password" type="password" required />
                   </Field>
                 </Field>
-                <FieldDescription>
-                  Must be at least 8 characters long.
-                </FieldDescription>
+                <FieldDescription>Трябва да е поне 8 символа.</FieldDescription>
               </Field>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit">Създай акаунт</Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <a href="#">Sign in</a>
+                  Вече имате акаунт? <a href="#">Влезте</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -68,8 +66,9 @@ export const SignupForm = ({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        Като продължите, вие се съгласявате с нашите{" "}
+        <a href="#">Условия за ползване</a> и{" "}
+        <a href="#">Политика за поверителност</a>.
       </FieldDescription>
     </div>
   )

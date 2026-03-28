@@ -23,16 +23,16 @@ export const LoginForm = ({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Влезте в акаунта си</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Въведете имейла си по-долу, за да влезете в акаунта си
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">Имейл</FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -42,23 +42,23 @@ export const LoginForm = ({
               </Field>
               <Field>
                 <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password">Парола</FieldLabel>
                   <a
                     href="#"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    Забравена парола?
                   </a>
                 </div>
                 <Input id="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit">Вход</Button>
                 <Button variant="outline" type="button">
-                  Login with Google
+                  Вход с Google
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Sign up</a>
+                  Нямате акаунт? <a href="#">Регистрирайте се</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>
