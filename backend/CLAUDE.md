@@ -62,7 +62,13 @@ tx.Description = dto.Description;
 _db.Transactions.Update(tx);
 await _db.SaveChangesAsync(ct);
 
-// ✅ Bulk update — never load entities just to update them
+// ✅ Single-entity delete
+var entity = await _db.Expenses.FindAsync([id], ct)
+    ?? throw new NotFoundException($"Expense {id} not found");
+_db.Expenses.Remove(entity);
+await _db.SaveChangesAsync(ct);
+
+// ✅ Bulk delete
 await _db.Transactions
     .Where(t => t.CreatedAt < cutoff)
     .ExecuteDeleteAsync(ct);
@@ -187,10 +193,20 @@ refactor: extract TransactionService from controller
 **Before every commit:** run the test suite. Do not commit if tests are red.
 
 ```bash
-dotnet test
+dotnet test ManageFinances.slnx
 ```
 
 **Never** add `Co-Authored-By` or any contributor lines to commit messages.
+
+---
+
+## Testing
+
+Test project lives at `backend.Tests/` (inside `backend/`). It references `backend.csproj` directly.
+
+`backend.csproj` excludes `backend.Tests/**` via `<Compile Remove>` — required because the test project is a subdirectory of the API project.
+
+`ExecuteDeleteAsync` is **not** supported by the InMemory provider — use `FindAsync + Remove` for single-entity deletes so tests work without a real DB.
 
 ---
 
