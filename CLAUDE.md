@@ -5,7 +5,9 @@
 Spin up with `docker compose up --build`.
 
 The backend runs on port **8080 inside Docker only** — not mapped to the host.
-Access the API through the Nginx proxy: `http://localhost/api`
+
+> **Dev mode:** `docker compose up` runs Vite dev server on `http://localhost:5173`.
+> Nginx and the Dockerfiles are used for production builds only.
 
 ## Structure
 

@@ -163,7 +163,7 @@ Package manager is **bun**.
 
 ```bash
 cd frontend
-bun run dev        # dev server
+bun run dev        # dev server (port 5173; proxies /api, /openapi, /scalar → http://backend:8080)
 bun run typecheck  # type-check without building
 bun run lint       # ESLint
 bun run format     # Prettier
