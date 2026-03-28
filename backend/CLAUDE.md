@@ -33,14 +33,14 @@ Add a `Services/` layer before adding any logic beyond simple CRUD. Controllers 
 
 ```csharp
 // ✅ DTO
-public record CreateTransactionRequest(string Description, decimal Amount);
-public record TransactionResponse(int Id, string Description, decimal Amount, DateTime CreatedAt);
+public record CreateExpenseRequest(int CategoryId, decimal Value, int UserId);
+public record ExpenseResponse(int Id, int CategoryId, decimal Value, int UserId, DateTime CreatedAt);
 
 // ✅ Explicit mapping
-public static class TransactionMappings
+public static class ExpenseMappings
 {
-    public static TransactionResponse ToResponse(this Transaction t) =>
-        new(t.Id, t.Description, t.Amount, t.CreatedAt);
+    public static ExpenseResponse ToResponse(this Expense e) =>
+        new(e.Id, e.CategoryId, e.Value, e.UserId, e.CreatedAt);
 }
 ```
 
@@ -56,10 +56,10 @@ public static class TransactionMappings
 
 ```csharp
 // ✅ Update pattern (NoTracking context)
-var tx = await _db.Transactions.FirstOrDefaultAsync(t => t.Id == id, ct)
-    ?? throw new NotFoundException($"Transaction {id} not found");
-tx.Description = dto.Description;
-_db.Transactions.Update(tx);
+var expense = await _db.Expenses.AsTracking().FirstOrDefaultAsync(e => e.Id == id, ct)
+    ?? throw new NotFoundException($"Expense {id} not found");
+expense.Value = dto.Value;
+_db.Expenses.Update(expense);
 await _db.SaveChangesAsync(ct);
 
 // ✅ Single-entity delete
@@ -69,8 +69,8 @@ _db.Expenses.Remove(entity);
 await _db.SaveChangesAsync(ct);
 
 // ✅ Bulk delete
-await _db.Transactions
-    .Where(t => t.CreatedAt < cutoff)
+await _db.Expenses
+    .Where(e => e.CreatedAt < cutoff)
     .ExecuteDeleteAsync(ct);
 ```
 
@@ -101,7 +101,7 @@ public async Task<IActionResult> Create(
     CreateTransactionRequest request,
     CancellationToken ct)
 {
-    var result = await _transactionService.CreateAsync(request, ct);
+    var result = await _expenseService.CreateAsync(request, ct);
     return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
 }
 ```
@@ -149,11 +149,11 @@ Log at the right level:
 
 ```csharp
 // ✅
-_logger.LogInformation("Transaction {Id} created for amount {Amount}", id, amount);
-_logger.LogError(ex, "Failed to delete transaction {Id}", id);
+_logger.LogInformation("Expense {Id} created for user {UserId}", id, userId);
+_logger.LogError(ex, "Failed to delete expense {Id}", id);
 
 // ❌
-Console.WriteLine($"Created transaction {id}");
+Console.WriteLine($"Created expense {id}");
 ```
 
 Do not log sensitive data (user input, amounts in financial contexts where regulations apply). Do not log on every read — only on writes and errors.
@@ -165,9 +165,10 @@ Do not log sensitive data (user input, amounts in financial contexts where regul
 Use DataAnnotations on request records. The `[ApiController]` attribute automatically returns `400 Bad Request` when model validation fails — no manual checks needed in controllers or services.
 
 ```csharp
-public record CreateTransactionRequest(
-    [Required, MaxLength(200)] string Description,
-    [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be positive")] decimal Amount
+public record CreateExpenseRequest(
+    [Range(1, int.MaxValue)] int CategoryId,
+    [Range(0.01, double.MaxValue, ErrorMessage = "Value must be positive")] decimal Value,
+    [Range(1, int.MaxValue)] int UserId
 );
 ```
 
@@ -185,9 +186,9 @@ Rules:
 Valid types: `feat`, `fix`, `refactor`, `test`, `docs`
 
 ```
-feat: add transaction filtering by date range
-fix: return 404 when transaction not found
-refactor: extract TransactionService from controller
+feat: add expense filtering by date range
+fix: return 404 when expense not found
+refactor: extract ExpenseService from controller
 ```
 
 **Before every commit:** run the test suite. Do not commit if tests are red.
