@@ -1,6 +1,8 @@
 # .NET build artifacts
 **/bin/
 **/obj/
+**/TestResults/
+coverage-report/
 
 # User-specific files
 *.user
