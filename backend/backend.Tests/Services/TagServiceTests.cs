@@ -49,8 +49,8 @@ public class TagServiceTests : IDisposable
 
         IReadOnlyList<TagResponse> result = await _sut.GetByUserAsync(1);
 
-        Assert.Equal(1, result.Count);
-        Assert.Contains(result, t => t.Name == "Essential");
+        TagResponse single = Assert.Single(result);
+        Assert.Equal("Essential", single.Name);
     }
 
     [Fact]
