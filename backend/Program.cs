@@ -35,6 +35,13 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+if (app.Environment.IsDevelopment())
+{
+    using IServiceScope scope = app.Services.CreateScope();
+    AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthentication();
