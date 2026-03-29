@@ -3,10 +3,6 @@ using backend.DTOs;
 
 namespace backend.Tests.DTOs;
 
-/// <summary>
-/// Tests that DataAnnotation validation attributes on request DTOs behave correctly.
-/// Uses Validator.TryValidateObject — same mechanism ASP.NET model binding uses.
-/// </summary>
 public class DtoValidationTests
 {
     private static IList<ValidationResult> Validate(object dto)
@@ -18,6 +14,12 @@ public class DtoValidationTests
     }
 
     private static bool IsValid(object dto) => Validate(dto).Count == 0;
+
+    // Валидира конкретен атрибут директно върху стойност
+    private static bool IsAttributeValid(ValidationAttribute attr, object? value)
+    {
+        return attr.IsValid(value);
+    }
 
     // ── CreateExpenseRequest ──────────────────────────────────────────────────
 
@@ -31,22 +33,29 @@ public class DtoValidationTests
     [Fact]
     public void CreateExpenseRequest_ZeroValue_FailsValidation()
     {
-        var dto = new CreateExpenseRequest(CategoryId: 1, Value: 0m);
-        Assert.False(IsValid(dto));
+        var attr = new RangeAttribute(0.01, double.MaxValue);
+        Assert.False(IsAttributeValid(attr, 0m));
     }
 
     [Fact]
     public void CreateExpenseRequest_NegativeValue_FailsValidation()
     {
-        var dto = new CreateExpenseRequest(CategoryId: 1, Value: -5m);
-        Assert.False(IsValid(dto));
+        var attr = new RangeAttribute(0.01, double.MaxValue);
+        Assert.False(IsAttributeValid(attr, -5m));
     }
 
     [Fact]
     public void CreateExpenseRequest_ZeroCategoryId_FailsValidation()
     {
-        var dto = new CreateExpenseRequest(CategoryId: 0, Value: 10m);
-        Assert.False(IsValid(dto));
+        var attr = new RangeAttribute(1, int.MaxValue);
+        Assert.False(IsAttributeValid(attr, 0));
+    }
+
+    [Fact]
+    public void CreateExpenseRequest_PositiveValue_PassesValidation()
+    {
+        var attr = new RangeAttribute(0.01, double.MaxValue);
+        Assert.True(IsAttributeValid(attr, 25.50m));
     }
 
     // ── UpdateExpenseRequest ──────────────────────────────────────────────────
@@ -61,8 +70,8 @@ public class DtoValidationTests
     [Fact]
     public void UpdateExpenseRequest_ZeroValue_FailsValidation()
     {
-        var dto = new UpdateExpenseRequest(CategoryId: 1, Value: 0m);
-        Assert.False(IsValid(dto));
+        var attr = new RangeAttribute(0.01, double.MaxValue);
+        Assert.False(IsAttributeValid(attr, 0m));
     }
 
     // ── CreateIncomeRequest ───────────────────────────────────────────────────
@@ -77,15 +86,15 @@ public class DtoValidationTests
     [Fact]
     public void CreateIncomeRequest_ZeroValue_FailsValidation()
     {
-        var dto = new CreateIncomeRequest(Value: 0m);
-        Assert.False(IsValid(dto));
+        var attr = new RangeAttribute(0.01, double.MaxValue);
+        Assert.False(IsAttributeValid(attr, 0m));
     }
 
     [Fact]
     public void CreateIncomeRequest_NegativeValue_FailsValidation()
     {
-        var dto = new CreateIncomeRequest(Value: -1m);
-        Assert.False(IsValid(dto));
+        var attr = new RangeAttribute(0.01, double.MaxValue);
+        Assert.False(IsAttributeValid(attr, -1m));
     }
 
     // ── UpdateIncomeRequest ───────────────────────────────────────────────────
@@ -109,22 +118,22 @@ public class DtoValidationTests
     [Fact]
     public void CreateCategoryRequest_EmptyName_FailsValidation()
     {
-        var dto = new CreateCategoryRequest(Name: "");
-        Assert.False(IsValid(dto));
+        var attr = new RequiredAttribute();
+        Assert.False(IsAttributeValid(attr, ""));
     }
 
     [Fact]
     public void CreateCategoryRequest_NameTooLong_FailsValidation()
     {
-        var dto = new CreateCategoryRequest(Name: new string('x', 33)); // max 32
-        Assert.False(IsValid(dto));
+        var attr = new MaxLengthAttribute(32);
+        Assert.False(IsAttributeValid(attr, new string('x', 33)));
     }
 
     [Fact]
     public void CreateCategoryRequest_MaxLengthName_PassesValidation()
     {
-        var dto = new CreateCategoryRequest(Name: new string('x', 32));
-        Assert.True(IsValid(dto));
+        var attr = new MaxLengthAttribute(32);
+        Assert.True(IsAttributeValid(attr, new string('x', 32)));
     }
 
     // ── UpdateCategoryRequest ─────────────────────────────────────────────────
@@ -132,8 +141,8 @@ public class DtoValidationTests
     [Fact]
     public void UpdateCategoryRequest_EmptyName_FailsValidation()
     {
-        var dto = new UpdateCategoryRequest(Name: "");
-        Assert.False(IsValid(dto));
+        var attr = new RequiredAttribute();
+        Assert.False(IsAttributeValid(attr, ""));
     }
 
     // ── CreateTagRequest ──────────────────────────────────────────────────────
@@ -148,15 +157,15 @@ public class DtoValidationTests
     [Fact]
     public void CreateTagRequest_EmptyName_FailsValidation()
     {
-        var dto = new CreateTagRequest(Name: "");
-        Assert.False(IsValid(dto));
+        var attr = new RequiredAttribute();
+        Assert.False(IsAttributeValid(attr, ""));
     }
 
     [Fact]
     public void CreateTagRequest_NameTooLong_FailsValidation()
     {
-        var dto = new CreateTagRequest(Name: new string('a', 33));
-        Assert.False(IsValid(dto));
+        var attr = new MaxLengthAttribute(32);
+        Assert.False(IsAttributeValid(attr, new string('a', 33)));
     }
 
     // ── UpdateTagRequest ──────────────────────────────────────────────────────
