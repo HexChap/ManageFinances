@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Exceptions;
 using backend.Models;
 using backend.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -42,8 +43,11 @@ if (app.Environment.IsDevelopment())
     await db.Database.MigrateAsync();
 }
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 app.UseExceptionHandler();
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
